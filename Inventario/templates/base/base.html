@@ -21,11 +21,11 @@
 
 </head>
 
-<body id="page-top">
-  
+<body id="page-top" class="bg-gradient-primary">
+  {% block side_bar %}
   <!-- Page Wrapper -->
   <div id="wrapper">
-    {% block side_bar %}
+    
     <!-- Sidebar -->
     <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
@@ -319,7 +319,7 @@
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
                   <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                  Logout
+                  Salir
                 </a>
               </div>
             </li>
@@ -329,8 +329,9 @@
         </nav>
         {% endblock top_Bar %}
         <!-- End of Topbar -->
-        {% block page_content %}
+        
         <!-- Begin Page Content -->
+        {% block page_content %}
         <div class="container-fluid">
 
           <!-- Page Heading -->
@@ -338,11 +339,11 @@
 
         </div>
         <!-- /.container-fluid -->
-
+         {% endblock page_content %}
+        {% block footer %}
       </div>
       <!-- End of Main Content -->
-      {% endblock page_content %}
-      {% block footer %}
+     
       <!-- Footer -->
       <footer class="sticky-footer bg-white">
         <div class="container my-auto">
@@ -352,11 +353,12 @@
         </div>
       </footer>
       <!-- End of Footer -->
-      {% endblock footer %}
+      
     </div>
     <!-- End of Content Wrapper -->
 
   </div>
+  {% endblock footer %}
   <!-- End of Page Wrapper -->
     {% block login %}
     {% endblock login %}
@@ -370,15 +372,15 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+          <h5 class="modal-title" id="exampleModalLabel">Listo Para Salir</h5>
           <button class="close" type="button" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">×</span>
           </button>
         </div>
-        <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+        <div class="modal-body">Seleccione Salir si esta seguro de cerrar seción</div>
         <div class="modal-footer">
           <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-          <a class="btn btn-primary" href="login.html">Logout</a>
+          <a class="btn btn-primary" href="{% url 'base:logout' %}">Salir</a>
         </div>
       </div>
     </div>
