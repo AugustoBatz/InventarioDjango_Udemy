@@ -21,5 +21,9 @@ urlpatterns = [
     ########## Unidad de medida ######
     path('um/', UMView.as_view(), name='um_list'),
     path('um/new', UMNew.as_view(), name='um_new'),
-    path('um/edit/<int:pk>', UMEdit.as_view(), name='um_edit')
+    path('um/edit/<int:pk>', UMEdit.as_view(), name='um_edit'),
+    # Productos
+    path('producto/', ProductoView.as_view(), name='producto_list'),
+    path('producto/new', ProductoNew.as_view(), name='producto_new'),
+    path('producto/edit/<int:pk>', ProductoEdit.as_view(), name='producto_edit'),
 ]

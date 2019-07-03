@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 
 class ClasesModelo(models.Model):
     estado = models.BooleanField(default=True)
+
     fc = models.DateTimeField(auto_now_add=True)
     fm = models.DateTimeField(auto_now=True)
     uc = models.ForeignKey(User, on_delete=models.CASCADE)

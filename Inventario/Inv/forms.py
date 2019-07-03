@@ -1,6 +1,6 @@
 # pode controlar lo que se va amostrar al formualrio
 from django import forms
-from .models import Categoria, SubCategoria, Marca, UnidadMedida
+from .models import Categoria, SubCategoria, Marca, UnidadMedida, Producto
 
 
 class CategoriaForm(forms.ModelForm):
@@ -70,3 +70,28 @@ class UnidadMedidaForm(forms.ModelForm):
             self.fields[field].widget.attrs.update({
                 'class': 'form-control'
             })
+
+
+class ProductoForm(forms.ModelForm):
+    class Meta:
+        model = Producto
+        fields = [
+            'codigo',
+            'descripcion',
+            'marca',
+            'existencia',
+            'stock_minimo',
+            # 'estado',
+            'unidad_medida',
+            'subcategoria'
+        ]
+        exclude = ['um', 'fm', 'uc', 'fc']
+        widget = {'descripcion': forms.TextInput()}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in iter(self.fields):
+            self.fields[field].widget.attrs.update({
+                'class': 'form-control'
+            })
+        self.fields['existencia'].widget.attrs['readonly'] = True

@@ -68,6 +68,14 @@ class Producto(ClasesModelo):
     descripcion = models.CharField(max_length=200)
     existencia = models.IntegerField(default=0)
     stock_minimo = models.IntegerField()
-    marca = models.ForeignKey(UnidadMedida, on_delete=models.CASCADE)
-    unidad_medida = models.ForeignKey(Marca, on_delete=models.CASCADE)
+
+    marca = models.ForeignKey(Marca, on_delete=models.CASCADE)
+    unidad_medida = models.ForeignKey(UnidadMedida, on_delete=models.CASCADE)
     subcategoria = models.ForeignKey(SubCategoria, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return '{}'.format(self.descripcion)
+
+    class Meta:
+        verbose_name_plural = "Productos"
+        unique_together = ('codigo', 'descripcion')
