@@ -11,4 +11,6 @@ urlpatterns = [
 
     path('compras/', FacturaCompraView.as_view(), name="compras_list"),
     path('compras/new', compras, name="compras_new"),
+    path('ajax_calls/search/', autocompleteModel, name="autocomplete"),
+
 ]

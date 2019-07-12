@@ -72,6 +72,21 @@ class FacturaCompraView(LoginRequiredMixin, generic.ListView):
     login_url = "bases:login"
 
 
+def autocompleteModel(request):
+    if request.is_ajax():
+        q = request.GET.get('term', '').capitalize()
+        search_qs = Producto.objects.filter(name__startswith=q)
+        results = []
+        print(q)
+        for r in search_qs:
+            results.append(r.FIELD)
+        data = json.dumps(results)
+    else:
+        data = 'fail'
+    mimetype = 'application/json'
+    return HttpResponse(data, mimetype)
+
+
 @login_required(login_url="bases:login")
 def compras(request, compra_id=None):
     template_name = "cmp/compras.html"
