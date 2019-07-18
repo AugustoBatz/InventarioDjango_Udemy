@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views import generic
 from django.urls import reverse_lazy
 import datetime
@@ -8,8 +8,11 @@ from .models import Proveedor, FacturaCompra, Lote
 from cmp.forms import ProveedorForm, FacturaCompraForm
 from django.http import HttpResponse
 from Inv.models import Producto
+from django.db.models import Sum
+from dal import autocomplete
 import json
-
+from django.db.models import Q
+from django.contrib import messages
 # Create your views here.
 
 
@@ -72,23 +75,8 @@ class FacturaCompraView(LoginRequiredMixin, generic.ListView):
     login_url = "bases:login"
 
 
-def autocompleteModel(request):
-    if request.is_ajax():
-        q = request.GET.get('term', '').capitalize()
-        search_qs = Producto.objects.filter(name__startswith=q)
-        results = []
-        print(q)
-        for r in search_qs:
-            results.append(r.FIELD)
-        data = json.dumps(results)
-    else:
-        data = 'fail'
-    mimetype = 'application/json'
-    return HttpResponse(data, mimetype)
-
-
 @login_required(login_url="bases:login")
-def compras(request, compra_id=None):
+def compras(request, facturacompra_id=None):
     template_name = "cmp/compras.html"
     prod = Producto.objects.filter(estado=True)
     form_compras = {}
@@ -97,10 +85,10 @@ def compras(request, compra_id=None):
 
     if request.method == 'GET':
         form_compras = FacturaCompraForm()
-        enc = FacturaCompra.objects.filter(pk=compra_id).first()
+        enc = FacturaCompra.objects.filter(pk=facturacompra_id).first()
 
         if enc:
-            det = Lote.Objtects.filter(compras=enc)
+            det = Lote.objects.filter(facturacompra=enc)
             fecha_compra = datetime.date.isoformat(enc.fecha_compra)
             e = {
                 'fecha_compra': fecha_compra,
@@ -110,10 +98,115 @@ def compras(request, compra_id=None):
                 'cantidad_producto': enc.cantidad_producto,
                 'total': enc.total
             }
-            form_compras = FacturaCompra(e)
+            form_compras = FacturaCompraForm(e)
         else:
             det = None
         context = {'productos': prod, 'encabezado': enc,
-                   'detelle': det, 'form_enc': form_compras}
+                   'detalle': det, 'form_enc': form_compras}
+    if request.method == 'POST':
+        fecha_compra = request.POST.get("fecha_compra")
+        proveedor = request.POST.get("proveedor")
+        serie = request.POST.get("serie")
+        numero = request.POST.get("numero")
+        total = 0
+        cantidad_producto = 0
+        # print("marcador")
+        if not facturacompra_id:
+            print("entra al ifnot compra id")
+            prov = Proveedor.objects.get(pk=proveedor)
+            enc = FacturaCompra(
+                fecha_compra=fecha_compra,
+                serie=serie,
+                numero=numero,
+                proveedor=prov,
+                uc=request.user,
+                total=total,
+                cantidad_producto=cantidad_producto
+            )
+            if enc:
+                print("entra al save")
+                enc.save()
+                facturacompra_id = enc.id
+            print("sale del if")
 
-        return render(request, template_name, context)
+        else:
+            print("entra else")
+            enc = FacturaCompra.objects.filter(pk=facturacompra_id).first()
+            if enc:
+                enc.fecha_compra = fecha_compra
+                enc.serie = serie
+                enc.numero = numero
+                enc.um = request.user.id
+                enc.save()
+        if not facturacompra_id:
+            return redirect("cmp:compras_list")
+
+        producto = request.POST.get("id_id_producto")
+        cantidad = request.POST.get("id_cantidad_detalle")
+        precio = request.POST.get("id_precio_detalle")
+        total = request.POST.get("id_total_detalle")
+        print("total 2"+str(total))
+        prod = Producto.objects.get(pk=producto)
+        Lotes = Lote.objects.filter(producto_id=producto).order_by(
+            '-noLote').values('noLote')[:1]
+        noLote = 1
+        if Lotes:
+            noLote = Lotes[0]
+            noLote = noLote['noLote']
+            noLote = noLote+1
+
+        det = Lote(
+            facturacompra=enc,
+            producto=prod,
+            cantidad=cantidad,
+            costo_unitario=precio,
+            costo_total=total,
+            uc=request.user,
+            fecha=fecha_compra,
+            noLote=noLote
+        )
+        if det:
+            existe_lote_producto = Lote.objects.filter(
+                producto_id=producto, facturacompra_id=facturacompra_id)
+            if existe_lote_producto:
+                print("este producto ya esta registrado")
+                messages.error(request, "Producto Ya Registrado")
+            else:
+                det.save()
+                total = Lote.objects.filter(
+                    facturacompra=facturacompra_id).aggregate(Sum('costo_total'))
+                cantidad = Lote.objects.filter(
+                    facturacompra=facturacompra_id).aggregate(Sum('cantidad'))
+                enc.cantidad_producto = cantidad["cantidad__sum"]
+                enc.total = total["costo_total__sum"]
+                enc.save()
+        return redirect("cmp:compras_edit", facturacompra_id=facturacompra_id)
+
+    return render(request, template_name, context)
+
+
+def autocompleteModel(request):
+    if request.is_ajax():
+        q = request.GET.get('term', '').capitalize()
+        search_qs = Producto.objects.filter(
+            Q(codigo__startswith=q) | Q(descripcion__startswith=q) | Q(marca__descripcion__startswith=q))
+        results = []
+        print(q)
+        for r in search_qs:
+            results.append(r.codigo + ', ' + r.descripcion +
+                           ', '+r.marca.descripcion)
+        data = json.dumps(results)
+    else:
+        data = 'fail'
+    mimetype = 'application/json'
+    return HttpResponse(data, mimetype)
+
+
+class CompraDetDelete(generic.DeleteView):
+    model = Lote
+    template_name = "cmp/compras_det_del.html"
+    context_object_name = 'obj'
+
+    def get_success_url(self):
+        facturacompra_id = self.kwargs['facturacompra_id']
+        return reverse_lazy('cmp:compras_edit', kwargs={'facturacompra_id': facturacompra_id})

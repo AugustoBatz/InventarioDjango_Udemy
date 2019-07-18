@@ -62,6 +62,10 @@ class Lote(ClasesModelo):
     facturacompra = models.ForeignKey(FacturaCompra, on_delete=models.CASCADE)
 
     def save(self):
+
+        self.ganancia = 0
+        self.precio_unitario = 0
+        self.precio_total = 0
         self.costo_total = float(
             float(int(self.cantidad)) * float(self.costo_unitario))
         super(Lote, self).save()

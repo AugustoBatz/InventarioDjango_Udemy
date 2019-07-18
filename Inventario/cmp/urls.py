@@ -1,4 +1,5 @@
 from django.urls import path
+
 from .views import *
 
 urlpatterns = [
@@ -11,6 +12,9 @@ urlpatterns = [
 
     path('compras/', FacturaCompraView.as_view(), name="compras_list"),
     path('compras/new', compras, name="compras_new"),
-    path('ajax_calls/search/', autocompleteModel, name="autocomplete"),
+    path('compras/edit/<int:facturacompra_id>', compras, name="compras_edit"),
+    path('ajax_calls/search/', autocompleteModel),
+    path('compras/<int:facturacompra_id>/delete/<int:pk>',
+         CompraDetDelete.as_view(), name="compras_del"),
 
 ]
