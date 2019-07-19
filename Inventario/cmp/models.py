@@ -3,6 +3,11 @@ from bases.models import ClasesModelo
 from Inv.models import Producto
 # Create your models here.
 
+# Para los signals
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+from django.db.models import Sum
+
 
 class Proveedor(ClasesModelo):
     nombre = models.CharField(
@@ -76,3 +81,40 @@ class Lote(ClasesModelo):
     class Meta:
         verbose_name_plural = "Detalles Compras"
         verbose_name = "Detalle Compra"
+
+
+@receiver(post_delete, sender=Lote)
+def detalle_compra_borrar(sender, instance, **kwargs):
+    id_producto = instance.producto.id
+    id_compra = instance.facturacompra.id
+
+    enc = FacturaCompra.objects.filter(pk=id_compra).first()
+    if enc:
+        total = Lote.objects.filter(
+            facturacompra=id_compra).aggregate(Sum('costo_total'))
+
+        cantidad = Lote.objects.filter(
+            facturacompra=id_compra).aggregate(Sum('cantidad'))
+        enc.cantidad_producto = cantidad["cantidad__sum"]
+        enc.total = total["costo_total__sum"]
+
+        enc.save()
+
+    prod = Producto.objects.filter(pk=id_producto).first()
+    if prod:
+        cantidad = int(prod.existencia) - int(instance.cantidad)
+        prod.existencia = cantidad
+        print("la cantidad de borrara es xd"+str(cantidad))
+        prod.save()
+
+
+@receiver(post_save, sender=Lote)
+def detalle_compra_guardar(sender, instance, **kwargs):
+    print("entra a la funcion")
+    id_producto = instance.producto.id
+    prod = Producto.objects.filter(pk=id_producto).first()
+    if prod:
+        cantidad = int(prod.existencia) + int(instance.cantidad)
+        print("la cantidad de tendra es xd"+str(cantidad))
+        prod.existencia = cantidad
+        prod.save()

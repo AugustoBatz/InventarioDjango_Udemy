@@ -185,23 +185,6 @@ def compras(request, facturacompra_id=None):
     return render(request, template_name, context)
 
 
-def autocompleteModel(request):
-    if request.is_ajax():
-        q = request.GET.get('term', '').capitalize()
-        search_qs = Producto.objects.filter(
-            Q(codigo__startswith=q) | Q(descripcion__startswith=q) | Q(marca__descripcion__startswith=q))
-        results = []
-        print(q)
-        for r in search_qs:
-            results.append(r.codigo + ', ' + r.descripcion +
-                           ', '+r.marca.descripcion)
-        data = json.dumps(results)
-    else:
-        data = 'fail'
-    mimetype = 'application/json'
-    return HttpResponse(data, mimetype)
-
-
 class CompraDetDelete(generic.DeleteView):
     model = Lote
     template_name = "cmp/compras_det_del.html"

@@ -41,3 +41,4 @@ class FacturaCompraForm(forms.ModelForm):
             })
         self.fields['cantidad_producto'].widget.attrs['readonly'] = True
         self.fields['total'].widget.attrs['readonly'] = True
+        self.fields['fecha_compra'].widget.attrs['readonly'] = True
