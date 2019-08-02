@@ -11,7 +11,8 @@
       </a>
       <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
         <div class="dropdown-header">Acciones:</div>
-        <a class="dropdown-item" href="{% url 'cmp:compras_new' %}"><i class="far fa-calendar-plus"></i> Nuevo</a>
+        <a class="dropdown-item" href="{% url 'cmp:compras_new' %}"><i class="far fa-calendar-plus"></i>Nuevo</a>
+        <a class="dropdown-item" href="{% url 'cmp:compras_print_all' %}" target="reportes"><i class="fas fa-print"></i>Listado</a>
       </div>
     </div>
   </div>
@@ -34,7 +35,7 @@
       <tbody>
         {% for item in obj%}
         <tr>
-          <td>{{ item.id }}</td>
+          <td>{{ forloop.counter}}</td>
           <td>{{ item.serie }}</td>
           <td>{{ item.numero }}</td>
           <td>{{ item.total }}</td>

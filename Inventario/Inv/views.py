@@ -3,6 +3,7 @@ from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Categoria, SubCategoria, Marca, UnidadMedida, Producto
 from .forms import CategoriaForm, SubCategoriaForm, MarcaForm, UnidadMedidaForm, ProductoForm
+from cmp.models import Lote
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -196,3 +197,12 @@ class ProductoEdit(LoginRequiredMixin, generic.UpdateView):
         form.instance.um = self.request.user.id
         print(form.instance.stock_minimo)
         return super().form_valid(form)
+
+
+@login_required(login_url="bases:login")
+def verLotes(request, idProd):
+    template_name = "inv/lotes_form.html"
+    producto = Producto.objects.filter(pk=idProd).first()
+    lotes = Lote.objects.filter(producto=producto).order_by('fecha')
+    contexto = {'lotes': lotes, 'producto': producto}
+    return render(request, template_name, contexto)

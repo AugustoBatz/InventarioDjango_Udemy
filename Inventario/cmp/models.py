@@ -1,6 +1,7 @@
 from django.db import models
 from bases.models import ClasesModelo
 from Inv.models import Producto
+from django.shortcuts import redirect
 # Create your models here.
 
 # Para los signals
@@ -60,23 +61,23 @@ class Lote(ClasesModelo):
     cantidad = models.IntegerField()
     costo_unitario = models.FloatField()
     costo_total = models.FloatField()
-    ganancia = models.FloatField()
-    precio_unitario = models.FloatField()
-    precio_total = models.FloatField()
+    #ganancia = models.FloatField()
+    #precio_unitario = models.FloatField()
+    #precio_total = models.FloatField()
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     facturacompra = models.ForeignKey(FacturaCompra, on_delete=models.CASCADE)
 
     def save(self):
 
-        self.ganancia = 0
-        self.precio_unitario = 0
-        self.precio_total = 0
+        #self.ganancia = 0
+        #self.precio_unitario = 0
+        #self.precio_total = 0
         self.costo_total = float(
             float(int(self.cantidad)) * float(self.costo_unitario))
         super(Lote, self).save()
-        self.precio_total = float(
-            float(int(self.cantidad)) * float(self.precio_unitario))
-        super(Lote, self).save()
+        # self.precio_total = float(
+        #    float(int(self.cantidad)) * float(self.precio_unitario))
+        #super(Lote, self).save()
 
     class Meta:
         verbose_name_plural = "Detalles Compras"
@@ -93,16 +94,23 @@ def detalle_compra_borrar(sender, instance, **kwargs):
         total = Lote.objects.filter(
             facturacompra=id_compra).aggregate(Sum('costo_total'))
 
+        print("el todal a cambiar es borrando: "+str(total))
         cantidad = Lote.objects.filter(
             facturacompra=id_compra).aggregate(Sum('cantidad'))
-        enc.cantidad_producto = cantidad["cantidad__sum"]
-        enc.total = total["costo_total__sum"]
+        if total["costo_total__sum"] == None:
+            total["costo_total__sum"] = 0
+            cantidad["cantidad__sum"] = 0
+            enc.delete()
+        else:
+            enc.cantidad_producto = cantidad["cantidad__sum"]
+            enc.total = total["costo_total__sum"]
 
-        enc.save()
+            enc.save()
 
     prod = Producto.objects.filter(pk=id_producto).first()
     if prod:
         cantidad = int(prod.existencia) - int(instance.cantidad)
+
         prod.existencia = cantidad
         print("la cantidad de borrara es xd"+str(cantidad))
         prod.save()
@@ -113,6 +121,7 @@ def detalle_compra_guardar(sender, instance, **kwargs):
     print("entra a la funcion")
     id_producto = instance.producto.id
     prod = Producto.objects.filter(pk=id_producto).first()
+
     if prod:
         cantidad = int(prod.existencia) + int(instance.cantidad)
         print("la cantidad de tendra es xd"+str(cantidad))

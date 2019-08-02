@@ -13,6 +13,7 @@ from dal import autocomplete
 import json
 from django.db.models import Q
 from django.contrib import messages
+
 # Create your views here.
 
 
@@ -104,6 +105,7 @@ def compras(request, facturacompra_id=None):
         context = {'productos': prod, 'encabezado': enc,
                    'detalle': det, 'form_enc': form_compras}
     if request.method == 'POST':
+
         fecha_compra = request.POST.get("fecha_compra")
         proveedor = request.POST.get("proveedor")
         serie = request.POST.get("serie")
@@ -112,7 +114,6 @@ def compras(request, facturacompra_id=None):
         cantidad_producto = 0
         # print("marcador")
         if not facturacompra_id:
-            print("entra al ifnot compra id")
             prov = Proveedor.objects.get(pk=proveedor)
             enc = FacturaCompra(
                 fecha_compra=fecha_compra,
@@ -124,13 +125,12 @@ def compras(request, facturacompra_id=None):
                 cantidad_producto=cantidad_producto
             )
             if enc:
-                print("entra al save")
+
                 enc.save()
                 facturacompra_id = enc.id
-            print("sale del if")
 
         else:
-            print("entra else")
+
             enc = FacturaCompra.objects.filter(pk=facturacompra_id).first()
             if enc:
                 enc.fecha_compra = fecha_compra
@@ -155,6 +155,7 @@ def compras(request, facturacompra_id=None):
             noLote = noLote['noLote']
             noLote = noLote+1
 
+        print("crear el detalle ante del save")
         det = Lote(
             facturacompra=enc,
             producto=prod,
@@ -166,13 +167,16 @@ def compras(request, facturacompra_id=None):
             noLote=noLote
         )
         if det:
+            print("crear el detalle")
             existe_lote_producto = Lote.objects.filter(
                 producto_id=producto, facturacompra_id=facturacompra_id)
             if existe_lote_producto:
                 print("este producto ya esta registrado")
                 messages.error(request, "Producto Ya Registrado")
             else:
+                print("antes del save al detalle")
                 det.save()
+                print("despues del save al detalle")
                 total = Lote.objects.filter(
                     facturacompra=facturacompra_id).aggregate(Sum('costo_total'))
                 cantidad = Lote.objects.filter(

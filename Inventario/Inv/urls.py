@@ -26,4 +26,5 @@ urlpatterns = [
     path('producto/', ProductoView.as_view(), name='producto_list'),
     path('producto/new', ProductoNew.as_view(), name='producto_new'),
     path('producto/edit/<int:pk>', ProductoEdit.as_view(), name='producto_edit'),
+    path('producto/lotes/<int:idProd>', verLotes, name='lote_list'),
 ]

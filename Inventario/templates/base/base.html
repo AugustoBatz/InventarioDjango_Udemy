@@ -41,21 +41,14 @@
 
       <!-- Sidebar - Brand -->
       <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{% url 'base:home' %}">
-        <div class="sidebar-brand-icon rotate-n-15">
-          <i class="fas fa-laugh-wink"></i>
-        </div>
+          
         <div class="sidebar-brand-text mx-3">Panel de Opciones </div>
       </a>
 
       <!-- Divider -->
       <hr class="sidebar-divider my-0">
 
-      <!-- Nav Item - Dashboard -->
-      <li class="nav-item">
-        <a class="nav-link" href="{% url 'base:home' %}">
-          <i class="fas fa-fw fa-tachometer-alt"></i>
-          <span>Dashboard</span></a>
-      </li>
+   
 
       <!-- Divider -->
       <hr class="sidebar-divider">
@@ -64,15 +57,31 @@
       <div class="sidebar-heading">
         Opciones de Menu
       </div>
-
-
+      <!-- Nav Item - Pages Collapse Menu -->
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCatalogo" aria-expanded="true" aria-controls="collapseCatalogo">
+          <i class="fas fa-clipboard-list"></i>
+          <span>Catalogos</span>
+        </a>
+        <div id="collapseCatalogo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+          <div class="bg-white py-2 collapse-inner rounded">
+            <h6 class="collapse-header">Catalogos de Inventario</h6>
+            <a class="collapse-item" href="{% url 'inv:producto_list' %}">Productos</a>
+            <a class="collapse-item" href="{% url 'inv:categoria_list' %}">Categorias</a>
+            <a class="collapse-item" href="{% url 'inv:subcategoria_list' %}">SubCategorias</a>
+            <a class="collapse-item" href="{% url 'inv:marca_list' %}">Marcas</a>
+            <a class="collapse-item" href="{% url 'inv:um_list' %}">Unidad Medida</a>
+            
+          </div>
+        </div>
+      </li>
       <!-- Nav Item - Utilities Collapse Menu -->
       <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities" aria-expanded="true" aria-controls="collapseUtilities">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCompras" aria-expanded="true" aria-controls="collapseCompras">
           <i class="fas fa-shopping-cart"></i>
           <span>Compras</span>
         </a>
-        <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
+        <div id="collapseCompras" class="collapse" aria-labelledby="headingUtilities" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
             <h6 class="collapse-header">Catalogos de Inventario</h6>
             <a class="collapse-item" href="{% url 'cmp:proveedor_list' %}">Proveedores</a>
@@ -81,20 +90,17 @@
           </div>
         </div>
       </li>
-      <!-- Nav Item - Pages Collapse Menu -->
+       <!-- Divider -->
       <li class="nav-item">
-        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
-          <i class="fas fa-clipboard-list"></i>
-          <span>Catalogos</span>
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseVentas" aria-expanded="true" aria-controls="collapseVentas">
+          <i class="fas fa-file-invoice-dollar"></i>
+          <span>Ventas</span>
         </a>
-        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+        <div id="collapseVentas" class="collapse" aria-labelledby="headingUtilities3" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
             <h6 class="collapse-header">Catalogos de Inventario</h6>
-            <a class="collapse-item" href="{% url 'inv:producto_list' %}">Productos</a>
-            <a class="collapse-item" href="{% url 'inv:categoria_list' %}">Categorias</a>
-            <a class="collapse-item" href="{% url 'inv:subcategoria_list' %}">SubCategorias</a>
-            <a class="collapse-item" href="{% url 'inv:marca_list' %}">Marcas</a>
-            <a class="collapse-item" href="{% url 'inv:um_list' %}">Unidad Medida</a>
+            <a class="collapse-item" href="{% url 'fac:cliente_list' %}">Clientes</a>
+  
             
           </div>
         </div>

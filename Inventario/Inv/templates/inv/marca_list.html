@@ -36,7 +36,8 @@
                 <tbody>
                     {% for item in obj  %}
                     <tr>
-                        <td>{{item.id}}</td>
+
+                        <td>{{forloop.counter}}</td>
                         <td>{{item.descripcion}}</td>
                         <td>{{item.estado|yesno:"Activo,Inactivo"}}</td>
                         <td>{{item.fc|date:"d/m/Y H:i:s"}}</td>
