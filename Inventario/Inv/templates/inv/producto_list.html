@@ -62,12 +62,10 @@
   $(document).ready(function() {
     $('.table').DataTable({
       "fnRowCallback": function(nRow, aData, iDisplayIndex, iDisplayIndexFull ){
-        console.log(aData[4])
-        console.log(aData[5])
-        if ( aData[4] < aData[5] )
+    
+        if ( parseInt(aData[4],10) < parseInt(aData[5],10)   )
         {
-          console.log(aData[4])
-          console.log(aData[5])
+         
           $('td', nRow).css('background-color', 'Red');
         }
       },
