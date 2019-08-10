@@ -1,6 +1,7 @@
 from django.db import models
 from bases.models import ClasesModelo
 from Inv.models import Producto
+from fac.models import LoteVenta
 from django.shortcuts import redirect
 # Create your models here.
 
@@ -59,6 +60,7 @@ class Lote(ClasesModelo):
     noLote = models.IntegerField()
     fecha = models.DateField()
     cantidad = models.IntegerField()
+    cantidad_inicial = models.IntegerField()
     costo_unitario = models.FloatField()
     costo_total = models.FloatField()
     #ganancia = models.FloatField()
@@ -66,9 +68,12 @@ class Lote(ClasesModelo):
     #precio_total = models.FloatField()
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     facturacompra = models.ForeignKey(FacturaCompra, on_delete=models.CASCADE)
+    loteventa = models.ForeignKey(
+        LoteVenta, null=True, on_delete=models.CASCADE)
 
     def save(self):
 
+        self.cantidad_inicial = self.cantidad
         #self.ganancia = 0
         #self.precio_unitario = 0
         #self.precio_total = 0

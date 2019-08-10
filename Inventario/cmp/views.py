@@ -102,8 +102,8 @@ def compras(request, facturacompra_id=None):
             form_compras = FacturaCompraForm(e)
         else:
             det = None
-        context = {'productos': prod, 'encabezado': enc,
-                   'detalle': det, 'form_enc': form_compras}
+        contexto = {'productos': prod, 'encabezado': enc,
+                    'detalle': det, 'form_enc': form_compras}
     if request.method == 'POST':
 
         fecha_compra = request.POST.get("fecha_compra")
@@ -186,7 +186,7 @@ def compras(request, facturacompra_id=None):
                 enc.save()
         return redirect("cmp:compras_edit", facturacompra_id=facturacompra_id)
 
-    return render(request, template_name, context)
+    return render(request, template_name, contexto)
 
 
 class CompraDetDelete(generic.DeleteView):
