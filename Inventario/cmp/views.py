@@ -81,9 +81,9 @@ def compras(request, facturacompra_id=None):
     template_name = "cmp/compras.html"
     prod = Producto.objects.filter(estado=True)
     form_compras = {}
-
+    proveedores = Proveedor.objects.filter(estado=True)
     contexto = {}
-
+    var_return = True
     if request.method == 'GET':
         form_compras = FacturaCompraForm()
         enc = FacturaCompra.objects.filter(pk=facturacompra_id).first()
@@ -103,34 +103,38 @@ def compras(request, facturacompra_id=None):
         else:
             det = None
         contexto = {'productos': prod, 'encabezado': enc,
-                    'detalle': det, 'form_enc': form_compras}
+                    'detalle': det, 'form_enc': form_compras, 'proveedores': proveedores}
     if request.method == 'POST':
 
         fecha_compra = request.POST.get("fecha_compra")
-        proveedor = request.POST.get("proveedor")
+        proveedor = request.POST.get("enc_proveedor")
         serie = request.POST.get("serie")
         numero = request.POST.get("numero")
         total = 0
         cantidad_producto = 0
-        # print("marcador")
         if not facturacompra_id:
-            prov = Proveedor.objects.get(pk=proveedor)
-            enc = FacturaCompra(
-                fecha_compra=fecha_compra,
-                serie=serie,
-                numero=numero,
-                proveedor=prov,
-                uc=request.user,
-                total=total,
-                cantidad_producto=cantidad_producto
-            )
-            if enc:
+            factura_existe = FacturaCompra.objects.filter(
+                serie=serie, numero=numero).first()
 
-                enc.save()
-                facturacompra_id = enc.id
+            if(not factura_existe):
 
+                prov = Proveedor.objects.get(pk=proveedor)
+                enc = FacturaCompra(
+                    fecha_compra=fecha_compra,
+                    serie=serie,
+                    numero=numero,
+                    proveedor=prov,
+                    uc=request.user,
+                    total=total,
+                    cantidad_producto=cantidad_producto
+                )
+                if enc:
+                    enc.save()
+                    facturacompra_id = enc.id
+            else:
+                messages.error(request, "Factura Ya registrada")
+                return redirect("cmp:compras_new")
         else:
-
             enc = FacturaCompra.objects.filter(pk=facturacompra_id).first()
             if enc:
                 enc.fecha_compra = fecha_compra
@@ -138,7 +142,7 @@ def compras(request, facturacompra_id=None):
                 enc.numero = numero
                 enc.um = request.user.id
                 enc.save()
-        if not facturacompra_id:
+        if not facturacompra_id and var_return == True:
             return redirect("cmp:compras_list")
 
         producto = request.POST.get("id_id_producto")

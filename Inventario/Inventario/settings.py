@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'bases',
     'Inv',
     'cmp',
+    'django_extensions',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

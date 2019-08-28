@@ -134,7 +134,6 @@ def ventas(request, facturaventa_id=None):
         precio = request.POST.get("id_precio_detalle")
         total = request.POST.get("id_total_detalle")
         prod = Producto.objects.get(pk=producto)
-        print(prod.existencia)
         disponible = prod.existencia
         if(int(cantidad, 10) > disponible):
             messages.error(request, "No existe stock suficiente")
@@ -159,20 +158,13 @@ def ventas(request, facturaventa_id=None):
                 noLote=noLote
             )
             if det:
-                print("crear el detalle")
                 existe_lote_producto = LoteVenta.objects.filter(
                     producto_id=producto, facturaventa_id=facturaventa_id)
                 if existe_lote_producto:
-                    print("este producto ya esta registrado")
                     messages.error(request, "Producto Ya Registrado")
                 else:
-                    print("antes del save al detalle")
-
                     det.save()
-                    print("detalle")
-                    print(det.id)
                     descarte(int(cantidad, 10), producto, det.id)
-                    print("despues del save al detalle")
                     total = LoteVenta.objects.filter(
                         facturaventa=facturaventa_id).aggregate(Sum('costo_total'))
                     cantidad = LoteVenta.objects.filter(
@@ -188,36 +180,29 @@ def ventas(request, facturaventa_id=None):
 
 
 def descarte(cantidad, producto, det):
-    print("entra a la funcion")
     cantidad_aux = cantidad
     lotes_necesarios = 0
     ids = []
     cantidad_en_lote = Lote.objects.filter(
         producto_id=producto, estado=True).order_by('fecha').values('cantidad', 'id')
     while(cantidad > 0):
-        print("entro al while")
         cantidad -= cantidad_en_lote[lotes_necesarios]['cantidad']
         ids.append(cantidad_en_lote[lotes_necesarios]['id'])
-        print(cantidad)
         lotes_necesarios += 1
     cantidad = cantidad_aux
-    print("ids "+str(ids))
     if(lotes_necesarios == 1):
         cantidad_aux = Lote.objects.filter(pk=ids[0]).values('cantidad')
         if(cantidad == cantidad_aux[0]['cantidad']):
-            print("se va a modificar")
             Lote.objects.filter(pk=ids[0]).update(
                 cantidad=0, estado=False, loteventa_id=det)
         else:
             cantidad_aux = cantidad_aux[0]['cantidad']-cantidad
-            print("cantidad aux"+str(cantidad_aux))
             Lote.objects.filter(pk=ids[0]).update(
                 cantidad=cantidad_aux,  loteventa_id=det)
     else:
         for id in ids:
             cantidad_aux = Lote.objects.filter(pk=id).values('cantidad')
             if(cantidad == cantidad_aux[0]['cantidad']):
-                print("se va a modificar")
                 Lote.objects.filter(pk=id).update(
                     cantidad=0, estado=False,  loteventa_id=det)
             if(cantidad > cantidad_aux[0]['cantidad']):
@@ -229,7 +214,6 @@ def descarte(cantidad, producto, det):
                 Lote.objects.filter(pk=id).update(
                     cantidad=cantidad_aux, loteventa_id=det)
 
-    print("se necesita "+str(lotes_necesarios))
     return lotes_necesarios
 
 

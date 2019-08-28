@@ -1,7 +1,6 @@
 from django.db import models
 from bases.models import ClasesModelo
 from Inv.models import Producto
-from fac.models import LoteVenta
 from django.shortcuts import redirect
 # Create your models here.
 
@@ -69,7 +68,7 @@ class Lote(ClasesModelo):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     facturacompra = models.ForeignKey(FacturaCompra, on_delete=models.CASCADE)
     loteventa = models.ForeignKey(
-        LoteVenta, null=True, on_delete=models.CASCADE)
+        'fac.LoteVenta', null=True, on_delete=models.CASCADE)
 
     def save(self):
 
@@ -126,9 +125,10 @@ def detalle_compra_guardar(sender, instance, **kwargs):
     print("entra a la funcion")
     id_producto = instance.producto.id
     prod = Producto.objects.filter(pk=id_producto).first()
-
+    cantidad = Lote.objects.filter(
+        producto=prod, estado=True).aggregate(Sum('cantidad'))
     if prod:
-        cantidad = int(prod.existencia) + int(instance.cantidad)
+        #cantidad = int(prod.existencia) + int(instance.cantidad)
         print("la cantidad de tendra es xd"+str(cantidad))
-        prod.existencia = cantidad
+        prod.existencia = cantidad["cantidad__sum"]
         prod.save()

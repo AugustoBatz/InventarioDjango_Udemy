@@ -3,6 +3,14 @@
     <form method="POST" id="frmCompras">
         {% csrf_token %}
         <div class="col-xl-12 col-md-12 mb-12">
+            {% if form.errors %}
+                {% for k,message in form.errors.items %}
+                    <div class="alert alert-danger">
+                        <strong>{{ message|escape }}</strong>
+                    </div>
+       
+                {% endfor %}
+            {% endif %}
             {% if encabezado %}
             <div class="row card border-left-warning shadow h-100 py-2">
             {% else %}
@@ -20,10 +28,18 @@
                                 <div class="col-6">
                                     <!-- Inicio Encabezado -->
                                     <div class="form-group row">
-                                        <label for="id_proveedor" class="col-sm-3 col-form-label">Proveedor:</label>
+                                        <div class="col-lg-5 form-group">
+                                            <select name="enc_proveedor" id="enc_proveedor" class="form-control">
+                                                <option value="0">Seleccione Cliente</option>
+                                                {% for item in proveedores   %}
+                                                    <option value="{{item.id}}">{{item.nit }} {{ item.nombre }} {{item.apellido}} </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <!--<label for="id_proveedor" class="col-sm-3 col-form-label">Proveedor:</label>
                                         <div class="col-sm-4 col-form-label">
                                             {{ form_enc.proveedor }}
-                                        </div>
+                                        </div>-->
                                         <label for="id_fecha_compra" class="col-sm-2 col-form-label">Fecha Compra:</label>
                                         <div class="col-sm-3 col-form-label">
                                             {{form_enc.fecha_compra}}
@@ -176,6 +192,7 @@
 
 <script>
     $(function () {
+        $("#enc_proveedor").val("{{ encabezado.proveedor.id }}").change();
         $("#id_fecha_compra, #id_fecha_factura").datetimepicker({
             format: 'Y-m-d',
             timepicker:false
@@ -252,6 +269,12 @@
             }
         });
         /*Fin Validar Envío de Detalle */
+        /*autocomplete*/
+        $('#enc_proveedor').select2({
+            placeholder: "Seleccione Cliente",
+            allowClear: true
+        });
+        
     });
     function selectProducto(id,descripcion)
     {

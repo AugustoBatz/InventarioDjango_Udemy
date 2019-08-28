@@ -87,12 +87,10 @@ class LoteVenta(ClasesModelo):
 
 @receiver(post_save, sender=LoteVenta)
 def detalle_compra_guardar(sender, instance, **kwargs):
-    print("entra a la funcion")
     id_producto = instance.producto.id
     prod = Producto.objects.filter(pk=id_producto).first()
 
     if prod:
         cantidad = int(prod.existencia) - int(instance.cantidad)
-        print("la cantidad de tendra es xd"+str(cantidad))
         prod.existencia = cantidad
         prod.save()

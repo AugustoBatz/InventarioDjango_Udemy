@@ -18,6 +18,22 @@ class CategoriaForm(forms.ModelForm):
                 'class': 'form-control'
             })
 
+    def clean(self):
+        try:
+            sc = Categoria.objects.get(
+                descripcion=self.cleaned_data['descripcion'].upper()
+
+            )
+
+            if not self.instance.pk:
+                raise forms.ValidationError("Registro ya existente")
+            elif self.instance.pk != sc.pk:
+                raise forms.ValidationError(
+                    "Cambio no Permitido, coincide con otro registro")
+        except Categoria.DoesNotExist:
+            pass
+        return self.cleaned_data
+
 
 class SubCategoriaForm(forms.ModelForm):
     categoria = forms.ModelChoiceField(
