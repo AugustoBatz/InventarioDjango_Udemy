@@ -8,6 +8,8 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages.views import SuccessMessageMixin
+from django.db import IntegrityError
+
 # Create your views here.
 
 
@@ -56,7 +58,11 @@ class SubCategoriaEdit(LoginRequiredMixin, generic.UpdateView):
 
     def form_valid(self, form):
         form.instance.um = self.request.user.id
-        return super().form_valid(form)
+        try:
+            return super(SubCategoriaEdit, self).form_valid(form)
+        except IntegrityError:
+            form.add_error('categoria', 'Ya existe este registro')
+            return self.form_invalid(form)
 
 
 class SubCategoriaView(LoginRequiredMixin, generic.ListView):
@@ -76,7 +82,11 @@ class SubCategoriaNew(LoginRequiredMixin, generic.CreateView):
 
     def form_valid(self, form):
         form.instance.uc = self.request.user
-        return super().form_valid(form)
+        try:
+            return super(SubCategoriaNew, self).form_valid(form)
+        except IntegrityError:
+            form.add_error('categoria', 'Ya existe este registro')
+            return self.form_invalid(form)
 
 
 class MarcaView(LoginRequiredMixin, generic.ListView):
@@ -181,7 +191,11 @@ class ProductoNew(LoginRequiredMixin, generic.CreateView):
 
     def form_valid(self, form):
         form.instance.uc = self.request.user
-        return super().form_valid(form)
+        try:
+            return super(ProductoNew, self).form_valid(form)
+        except IntegrityError:
+            form.add_error('descripcion', 'Ya existe este registro')
+            return self.form_invalid(form)
 
 
 class ProductoEdit(LoginRequiredMixin, generic.UpdateView):
@@ -195,8 +209,11 @@ class ProductoEdit(LoginRequiredMixin, generic.UpdateView):
 
     def form_valid(self, form):
         form.instance.um = self.request.user.id
-        print(form.instance.stock_minimo)
-        return super().form_valid(form)
+        try:
+            return super(ProductoEdit, self).form_valid(form)
+        except IntegrityError:
+            form.add_error('descripcion', 'Ya existe este registro')
+            return self.form_invalid(form)
 
 
 @login_required(login_url="bases:login")

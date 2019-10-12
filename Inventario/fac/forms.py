@@ -42,3 +42,19 @@ class FacturaVentaForm(forms.ModelForm):
         self.fields['cantidad_producto'].widget.attrs['readonly'] = True
         self.fields['total'].widget.attrs['readonly'] = True
         self.fields['fecha_compra'].widget.attrs['readonly'] = True
+
+    def clean(self):
+        try:
+
+            sc = FacturaVenta.objects.filter(
+                serie=self.cleaned_data['serie'], numero=self.cleaned_data['numero']
+            )
+
+            if len(sc) > 0:
+                raise forms.ValidationError("Factura ya registrada")
+
+        except FacturaVenta.DoesNotExist:
+
+            pass
+
+        return self.cleaned_data

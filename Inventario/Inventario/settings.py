@@ -32,6 +32,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'rest_framework',
+    'api',
     'fac',
     'dal',
     'dal_select2',
@@ -45,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
 ]
 
 MIDDLEWARE = [
@@ -76,6 +79,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'Inventario.wsgi.application'
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 
 # Database
@@ -84,11 +88,11 @@ WSGI_APPLICATION = 'Inventario.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'db_djfull',
+        'NAME': 'db_full',
         'HOST': 'localhost',
         'USER': 'devSYS',
         'PASSWORD': 'devOP',
-        'PORT': 5433
+        'PORT': 5432
     }
 }
 
@@ -121,7 +125,7 @@ TIME_ZONE = 'America/Guatemala'
 
 USE_I18N = True
 
-USE_L10N = True
+USE_L10N = False
 
 USE_TZ = True
 
@@ -134,6 +138,6 @@ STATIC_ROOT = 'staticfiles'
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 
 
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/inv/producto/'
 
 LOGOUT_REDIRECT_URL = '/login/'

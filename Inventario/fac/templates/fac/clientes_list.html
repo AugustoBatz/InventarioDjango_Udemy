@@ -78,16 +78,16 @@
           location.reload(true);
         }
         else{
-          mensaje("Erro intentando cambiar estado");
+          mensaje("Error intentando cambiar estado");
         }
       },
       error: function(jqXHR, textStatus, errorThrow){
         console.log(textStatus, errorThrow);
         mensaje(errorThrow,'red');
-        cerrar_modal();
+        
       }
     });
-  }
+  };
 // Call the dataTables jQuery plugin
  $(document).ready(function() {
     $('.table').DataTable({

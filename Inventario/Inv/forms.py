@@ -1,6 +1,7 @@
 # pode controlar lo que se va amostrar al formualrio
 from django import forms
 from .models import Categoria, SubCategoria, Marca, UnidadMedida, Producto
+import random
 
 
 class CategoriaForm(forms.ModelForm):
@@ -24,13 +25,14 @@ class CategoriaForm(forms.ModelForm):
                 descripcion=self.cleaned_data['descripcion'].upper()
 
             )
-
+            print(self.instance.pk)
             if not self.instance.pk:
                 raise forms.ValidationError("Registro ya existente")
             elif self.instance.pk != sc.pk:
                 raise forms.ValidationError(
                     "Cambio no Permitido, coincide con otro registro")
         except Categoria.DoesNotExist:
+            print("pasa el pas de ")
             pass
         return self.cleaned_data
 
@@ -89,15 +91,15 @@ class UnidadMedidaForm(forms.ModelForm):
 
 
 class ProductoForm(forms.ModelForm):
+
     class Meta:
         model = Producto
         fields = [
-            'codigo',
             'descripcion',
             'marca',
             'existencia',
             'stock_minimo',
-            # 'estado',
+            'precio_venta',
             'unidad_medida',
             'subcategoria'
         ]
@@ -110,4 +112,5 @@ class ProductoForm(forms.ModelForm):
             self.fields[field].widget.attrs.update({
                 'class': 'form-control'
             })
+
         self.fields['existencia'].widget.attrs['readonly'] = True

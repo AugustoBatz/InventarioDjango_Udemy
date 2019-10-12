@@ -21,5 +21,6 @@ urlpatterns = [
     path('inv/', include(('Inv.urls', 'inv'), namespace='inv')),
     path('admin/', admin.site.urls),
     path('cmp/', include(('cmp.urls', 'cmp'), namespace='cmp')),
-    path('fac/', include(('fac.urls', 'fac'), namespace='fac'))
+    path('fac/', include(('fac.urls', 'fac'), namespace='fac')),
+    path('api/', include(('api.urls', 'api'), namespace='api'))
 ]

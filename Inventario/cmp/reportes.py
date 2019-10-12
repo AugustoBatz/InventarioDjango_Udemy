@@ -6,6 +6,7 @@ from django.template.loader import get_template
 from xhtml2pdf import pisa
 from .models import FacturaCompra, Lote
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required, permission_required
 
 
 def link_callback(uri, rel):
@@ -35,6 +36,7 @@ def link_callback(uri, rel):
     return path
 
 
+@permission_required('cmp.can_mark_returned')
 def reporte_compras(request):
     template_path = 'cmp/compras_print_all.html'
     today = timezone.now()

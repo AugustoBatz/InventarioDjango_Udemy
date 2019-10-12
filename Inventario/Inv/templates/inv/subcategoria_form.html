@@ -3,6 +3,14 @@
   {% csrf_token %}
   <!-- Earnings (Monthly) Card Example -->
   <div class="col-xl-12 col-md-12 mb-12">
+    {% if form.errors %}
+      {% for k,message in form.errors.items %}
+        <div class="alert alert-danger">
+          <strong>{{ message|escape }}</strong>
+       </div>
+       
+      {% endfor %}
+    {% endif %}
     {% if obj %}
     <div class="card border-left-warning shadow h-100 py-2">
     {% else %}

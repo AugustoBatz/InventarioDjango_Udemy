@@ -1,0 +1,288 @@
+{% extends 'base/base.html' %}
+
+{% block page_content %}
+<form method="post" id="frmCompras">
+    {% csrf_token %}
+<div class="card shadow mb-4">
+    {% if form_enc.errors %}
+        {% for k,message in form_enc.errors.items %}
+            {% if k == source %}
+             
+            {% else %}
+                {% if not encabezado %}
+                <div class="alert alert-danger">
+                    <strong>{{ message|escape }}</strong>
+                    
+                </div>  
+                {% endif %}
+            {% endif %}     
+             
+        {% endfor %}
+    {% endif %}
+    {% if encabezado %}
+    <div class="card-header border-left-warning py-3 d-flex flex-row align-items-center justify-content-between">    
+    {% else %}
+    <div class="card-header border-left-success py-3 d-flex flex-row align-items-center justify-content-between">
+    {% endif %}
+        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                {% if encabezado %} Editar {% else %} Nueva {% endif %} Compra
+        </div>
+        <a href="{% url 'cmp:compras_list' %}" class="btn btn-danger">Guardar</a>
+        <a href="#" class="btn btn-success">Imprimir</a>
+        <a href="{% url 'cmp:compras_list' %}" class="btn btn-info">Cancelar</a>
+    </div>
+    
+    <div class="card-body">
+        <div class="content">
+            <!-- Sección Superior -->
+            <div class="row">
+                <!-- Sección Izquierda -->
+                <div class="col-lg-6 form-group">
+                    <div class="content">
+                        <div class="row">
+                            <div class="col-lg-5 form-group">
+                                <select name="enc_proveedor" id="enc_proveedor" class="form-control">
+                                    
+                                    {% for item in proveedores   %}
+                                    <option value="{{item.id}}">{{item.nit }} {{ item.nombre }} {{item.apellido}} </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <label for="id_fecha_compra" class="col-sm-2 col-form-label">Fecha Compra:</label>
+                            <div class="col-sm-3 col-form-label">
+                                {{form_enc.fecha_compra}}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-2 col-form-label" for="id_serie">Serie:</label>
+                            <div class="col-sm-3 col-form-label">
+                                {{form_enc.serie}}
+                            </div>
+                            <label class="col-sm-2 col-form-label" for="id_numero">No. Factura:</label>
+                            <div class="col-sm-3 col-form-label">
+                                {{form_enc.numero}}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-2 col-form-label" for="total">Cantidad:</label>
+                            <div class="col-sm-3 col-form-label">
+                                {{form_enc.cantidad_producto}}
+                            </div>
+                            <label class="col-sm-2 col-form-label" for="total">Total:</label>
+                            <div class="col-sm-3 col-form-label">
+                                {{form_enc.total}}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- Fin Sección Izquierda -->
+                <!-- Sección Derecha -->
+                <div class="col-lg-6 from-group">
+                    <div class="row p-2">
+                        <div class="col-lg-2">Codigo</div>
+                        <div class="col-lg-3">
+                            <input type="text" class="form-control" name="codigo" id="codigo" placeholder="Codigo" required>
+                        </div>
+                        <div class="col-lg-6">
+                            <input type="text" class="form-control" name="descripcion" id="descripcion" placeholder="Descripción" disabled>
+                        </div>
+                        <div class="col-lg-1">
+                            <button type="button" class="btn btn-info" id="btnBuscar">
+                                <i class="fab fa-searchengin"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-2">Cantidad</div>
+                        <div class="col-lg-3">
+                            <input type="number" class="form-control" name="id_cantidad_detalle" id="id_cantidad_detalle" placeholder="Cantidad">
+                        </div>
+                        <div class="col-lg-2">Precio</div>
+                        <div class="col-lg-3">
+                            <input type="number" step="0.01" class="form-control" name="id_precio_detalle" id="id_precio_detalle" placeholder="Precio">
+                        </div>
+                        <div class="col-lg-1">
+                            <button type="submit" class="btn btn-danger" id="btnGuardar"> <i class="far fa-plus-square"></i> </button>
+                        </div>
+                    </div>
+
+                    <div class="row p-1">
+                        <div class="col-lg-9 text-right">Total</div>
+                        <div class="col-lg-3">
+                            <input type="number" class="form-control" name="id_total_detalle" id="id_total_detalle" placeholder="Total"
+                             value="0.00" disabled>
+                        </div>
+                    </div>
+                </div>
+                <!-- Fin Sección Derecha -->
+            </div>
+            <!-- Fin Sección Superior -->
+            <!-- Inicio Detalle -->
+            <hr>
+            <div class="row p-1">
+                <div class="col-lg-12">
+                    <table
+                        data-toggle="table"
+                        data-pagination="true"
+                        data-search="true"
+                        data-show-columns="true"
+                        data-show-toggle="true"
+                        data-show-fullscreen="true"
+                        data-locale="es-NI"
+                        >
+                        <thead>
+                            <th>Numero</th>
+                            <th>Producto</th>
+                            <th>Marca</th>
+                            <th>Categoria</th>
+                            <th>Unidad</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                            <th>Total</th>
+                            <th class="all">Acciones</th>
+                        </thead>
+                        <tbody>
+                            {% for item in detalle %}
+                            <tr>
+
+                                <td>{{ item.pk }}</td>
+                                <td>{{ item.producto }}</td>
+                                <td>{{ item.producto.marca.descripcion }}</td>
+                                <td>{{ item.producto.subcategoria.descripcion }}</td>
+                                <td>{{ item.producto.unidad_medida.descripcion }}</td>
+                                <td>{{ item.cantidad }}</td>
+                                <td>{{ item.costo_unitario }}</td>
+                                <td>{{ item.costo_total }}</td>
+                                <td>
+                                    <button class="btn btn-danger btn-circle" onclick="return abrir_modal('{% url 'cmp:compras_del' encabezado.pk item.id %}')"><i class="fas fa-trash-alt"></i></button>
+
+                                </td>
+                                fds
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+            <!-- Fin Detalle -->
+        </div>
+    </div>
+</div>
+</form>
+{% endblock %}
+
+
+{% block js_page %}
+<script>
+    function buscarProducto(){
+        if($('#enc_proveedor').val()==="0"||$('#enc_proveedor').val()===null){
+            mensaje("Cliente No Seleccionado","red");
+            return false;
+        }
+        var codigo=$('#codigo').val();
+        if(codigo===""){
+            return false
+        }
+        var path="{% url 'api:producto_list' %}"+codigo;
+        $.ajax({
+            type:"GET",
+            url:path,
+            success: function(r){
+                
+                $("#codigo").val(r.codigo);
+                $("#descripcion").val(r.descripcion);
+            },
+            error:function(a,b,c){
+                if(a.status==404){
+                    mensaje("Producto - "+ codigo +"- No Encontrado o No Existe","red");
+                    $("#codigo").val("");
+                    $("#descripcion").val("");
+                    $("#codigo").focus();
+                }
+
+            }
+        });
+        
+
+    };
+    $(function () {
+        
+        $("#enc_proveedor").val("{{ encabezado.proveedor.id }}").change();
+        $("#sidebarToggle").click();
+        $('#enc_proveedor').select2({
+            placeholder: "Seleccione Cliente",
+            allowClear: true
+        });
+        $('#id_cantidad_detalle,#id_precio_detalle').change(function(){
+            calcular_detalle();
+        });
+        $('#btnBuscar').click(function(e){
+            if($('#enc_proveedor').val()==="0"){
+                console.log("entra al if");
+                mensaje("Proveedor No Seleccionado","red");
+                return false;
+            }
+            abrir_modal("{% url 'cmp:compra_producto' %}")
+        });
+        $("#codigo").keypress(function(e){
+            if(e.keyCode===13){
+                e.preventDefault();
+                buscarProducto();
+                $("#id_cantidad_detalle").focus();
+            }
+        });
+        $("#codigo").blur(function(){
+            
+                buscarProducto();
+                $("#id_cantidad_detalle").focus();
+            
+        });
+        $("#id_fecha_compra, #id_fecha_factura").datetimepicker({
+            format: 'Y-m-d',
+            timepicker:false
+        });   
+        $('form').submit(function () {
+
+            // Get the Login Name value and trim it
+            var total = $("#id_total_detalle").val();
+            var fecha = $('#id_fecha_compra').val();
+            console.log(fecha)
+            // Check if empty of not
+            if (total  === '0.00' || total  === '0') {
+                mensaje('Error en el detalle');
+                return false;
+            }
+        });        
+    });
+   
+    function calcular_detalle()
+    {
+        var cant,prec,total;
+        cant = $("#id_cantidad_detalle").val();
+        cant = cant==="" ? 0 : +cant;
+        cant = cant<0 ? 0 : cant;
+        prec =$('#id_precio_detalle').val();
+        prec = prec==="" ? 0 : +prec;
+        prec = prec<0 ? 0 : prec;
+
+        total = cant * prec;
+        $('#id_cantidad_detalle').val(cant);
+        $('#id_precio_detalle').val(prec);
+        $('#id_total_detalle').val(total);
+    }
+    function clear_Detail(){
+        $('#id_cantidad_detalle').val(0);
+        $('#id_precio_detalle').val(0);
+        $('#id_descuento_detalle').val(0);
+        $('#id_sub_total_detalle').val(0);
+        $('#id_total_detalle').val(0);
+        $('#id_id_producto').val('');
+        $('#id_descripcion_producto').val('');
+        $('.table').DataTable().search('').draw();
+        $("#id_proveedor").focus();
+    }
+    $("#id_proveedor").focus();
+</script>
+{% endblock %}
