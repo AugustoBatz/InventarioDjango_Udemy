@@ -410,47 +410,132 @@ def ventas2(request, facturaventa_id=None):
         total = request.POST.get("id_total_detalle")
         prod = Producto.objects.get(codigo=codigo)
         disponible = prod.existencia
-        if(int(cantidad, 10) > disponible):
-            messages.error(request, "No existe stock suficiente")
-            return redirect("fac:ventas_edit", facturaventa_id=facturaventa_id)
+        metodo=request.POST.get("RD")
+        if(metodo=="mercado"):
+            if(int(cantidad, 10) > disponible):
+                messages.error(request, "No existe stock suficiente")
+                return redirect("fac:ventas_edit", facturaventa_id=facturaventa_id)
+            else:
+                # apartado para lote venta
+                lotesV = LoteVenta.objects.filter(producto_id=prod).order_by(
+                    '-noLote').values('noLote')[:1]
+                noLote = 1
+                if lotesV:
+                    noLote = lotesV[0]
+                    noLote = noLote['noLote']
+                    noLote = noLote+1
+                det = LoteVenta(
+                    facturaventa=enc,
+                    producto=prod,
+                    cantidad=cantidad,
+                    costo_unitario=precio,
+                    costo_total=total,
+                    uc=request.user,
+                    fecha=fecha_compra,
+                    noLote=noLote
+                )
+                if det:
+                    existe_lote_producto = LoteVenta.objects.filter(
+                        producto_id=prod, facturaventa_id=facturaventa_id)
+                    if existe_lote_producto:
+                        messages.error(request, "Producto Ya Registrado")
+                    else:
+                        det.save()
+                        descarte(int(cantidad, 10), prod)
+                        total = LoteVenta.objects.filter(
+                            facturaventa=facturaventa_id).aggregate(Sum('costo_total'))
+                        cantidad = LoteVenta.objects.filter(
+                            facturaventa=facturaventa_id).aggregate(Sum('cantidad'))
+                        enc.cantidad_producto = cantidad["cantidad__sum"]
+                        enc.total = total["costo_total__sum"]
+                        enc.save()
+                return redirect("fac:ventas_edit", facturaventa_id=facturaventa_id)
+                
         else:
-            # apartado para lote venta
-            lotesV = LoteVenta.objects.filter(producto_id=prod).order_by(
-                '-noLote').values('noLote')[:1]
-            noLote = 1
-            if lotesV:
-                noLote = lotesV[0]
-                noLote = noLote['noLote']
-                noLote = noLote+1
-            det = LoteVenta(
-                facturaventa=enc,
-                producto=prod,
-                cantidad=cantidad,
-                costo_unitario=precio,
-                costo_total=total,
-                uc=request.user,
-                fecha=fecha_compra,
-                noLote=noLote
-            )
-            if det:
-                existe_lote_producto = LoteVenta.objects.filter(
-                    producto_id=prod, facturaventa_id=facturaventa_id)
-                if existe_lote_producto:
-                    messages.error(request, "Producto Ya Registrado")
-                else:
-                    det.save()
-                    descarte(int(cantidad, 10), prod)
-                    total = LoteVenta.objects.filter(
-                        facturaventa=facturaventa_id).aggregate(Sum('costo_total'))
-                    cantidad = LoteVenta.objects.filter(
-                        facturaventa=facturaventa_id).aggregate(Sum('cantidad'))
-                    enc.cantidad_producto = cantidad["cantidad__sum"]
-                    enc.total = total["costo_total__sum"]
-                    enc.save()
-            return redirect("fac:ventas_edit", facturaventa_id=facturaventa_id)
-
+            print("no existe metodo")
     return render(request, template_name, contexto)
 
 
 class ProductoView(inv.ProductoView):
     template_name = "fac/buscarProducto.html"
+
+
+def cuantoLotes(cantidad, producto):
+    ids = []
+    aux_cantidad = cantidad
+    lotes_necesarios = 0
+    precios = 0
+    cantidad_en_lote = Lote.objects.filter(
+        producto_id=producto, estado=True).order_by('fecha').values('cantidad', 'id')
+    while(cantidad > 0):
+        cantidad -= cantidad_en_lote[lotes_necesarios]['cantidad']
+        ids.append(cantidad_en_lote[lotes_necesarios]['id'])
+        lotes_necesarios += 1
+    cantidad = aux_cantidad
+
+    if(lotes_necesarios == 1):
+        precios = 0
+        cantidad_aux = Lote.objects.filter(pk=ids[0]).values('cantidad','precio_unitario')
+        if(cantidad == cantidad_aux[0]['cantidad']):
+            precio_total = cantidad_aux[0]['cantidad']*cantidad_aux[0]['precio_unitario']
+            precios=precios+precio_total
+            
+            
+        else:
+            precio_total = cantidad*cantidad_aux[0]['precio_unitario']
+            precios=precios+precio_total
+    else:
+        precios = 0
+        print(ids)
+        for id in ids:
+            print("for "+str(id))
+            cantidad_aux = Lote.objects.filter(pk=id).values('cantidad','precio_unitario')
+            if(cantidad == cantidad_aux[0]['cantidad']):
+                precio_total = cantidad_aux[0]['cantidad']*cantidad_aux[0]['precio_unitario']
+                precios=precios+precio_total
+                cantidad = cantidad-cantidad_aux[0]['cantidad']
+                print("=")
+                print("cantidad"+str(cantidad))
+                print(precios)
+            elif(cantidad > cantidad_aux[0]['cantidad']):
+                #cantidad_aux2 = Lote.objects.filter(pk=id).values('cantidad','precio_unitario')
+                precio_total = cantidad_aux[0]['cantidad']*cantidad_aux[0]['precio_unitario']
+                precios=precios+precio_total
+                cantidad = cantidad-cantidad_aux[0]['cantidad']
+                print(">")
+                print("cantidad"+str(cantidad))
+                print(precios)
+                #Lote.objects.filter(pk=id).update(
+                    #cantidad=0, estado=False)
+            elif(cantidad < cantidad_aux[0]['cantidad']):
+                precio_total = cantidad*cantidad_aux[0]['precio_unitario']
+                precios=precios+precio_total
+                print("<")
+                print("cantidad"+str(cantidad))
+                print(precios)
+                #Lote.objects.filter(pk=id).update(
+                    #cantidad=cantidad_aux)
+
+    #print(precios)
+    return precios
+
+
+def precio_dinamico(request):
+    from django.http import JsonResponse
+    codigo = request.GET.get('codigo', None)
+    cantidad = request.GET.get('cantidad', None)
+    producto = Producto.objects.get(codigo=codigo)
+    cantidad_producto = producto.existencia
+    data = {}
+    if cantidad != '':
+        if cantidad_producto < int(cantidad):
+
+            data = {
+                'error': "Cantidad Insuficiente en Stock"
+            }
+        else:
+            lotes = cuantoLotes(int(cantidad), producto)
+            data = {
+                'success': lotes
+            }
+    return JsonResponse(data)

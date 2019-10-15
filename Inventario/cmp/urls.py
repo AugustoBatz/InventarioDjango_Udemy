@@ -15,6 +15,11 @@ urlpatterns = [
     path('compras/new', compras2, name="compras_new"),
     path('compras/edit/<int:facturacompra_id>', compras2, name="compras_edit"),
     path('compras/anular/<int:id>', anularCompra, name="desactivarFactura"),
+    ##
+    path('compras/canceladas', FacturaCompraCanView.as_view(),
+         name="compras_canceladas"),
+    path('compras/compra-cancelada/<int:facturacompra_id>',
+         compra_cancelada, name="compras_cancelada"),
     #
     path('compras2/new', compras, name="compras_new2"),
     path('compras2/edit/<int:facturacompra_id>',

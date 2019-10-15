@@ -60,9 +60,10 @@
                     //alert(response);
                     var tipo=(response.startsWith('Factura no existe')? 'red':'green');
                     mensaje(response,tipo);
-                    #location.reload(true);
+                    location.reload(true);
                 },
                 error: function(jqXHR,textStatus,errorThrow){
+                    console.log("hay errores");
                     mensaje(errorThrow,'red');
                     console.log(textStatus,errorThrow);
                     cerrar_modal();

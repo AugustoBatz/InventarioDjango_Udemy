@@ -117,16 +117,17 @@ class Producto(ClasesModelo):
         return '{}'.format(self.descripcion)
 
     def save(self):
-        productos = Producto.objects.filter(
-            marca=self.marca, unidad_medida=self.unidad_medida, subcategoria=self.subcategoria).count()
+        if not self.id:
+            productos = Producto.objects.filter(
+                marca=self.marca, unidad_medida=self.unidad_medida, subcategoria=self.subcategoria).count()
 
-        if productos:
-            codigoCreate = str(1+productos)+"-"+str(self.marca.id)+"-" + \
-                str(self.unidad_medida.id)+"-"+str(self.subcategoria.id)
-        else:
-            codigoCreate = str(1)+"-"+str(self.marca.id)+"-" + \
-                str(self.unidad_medida.id)+"-"+str(self.subcategoria.id)
-        self.codigo = codigoCreate
+            if productos:
+                codigoCreate = str(1+productos)+"-"+str(self.marca.id)+"-" + \
+                    str(self.unidad_medida.id)+"-"+str(self.subcategoria.id)
+            else:
+                codigoCreate = str(1)+"-"+str(self.marca.id)+"-" + \
+                    str(self.unidad_medida.id)+"-"+str(self.subcategoria.id)
+            self.codigo = codigoCreate
         self.descripcion = self.descripcion.upper()
         super(Producto, self).save()
 

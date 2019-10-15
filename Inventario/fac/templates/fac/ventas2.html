@@ -27,9 +27,7 @@
         <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                 {% if encabezado %} Editar {% else %} Nueva {% endif %} Venta
         </div>
-        <a href="#" class="btn btn-danger">Guardar</a>
-        <a href="#" class="btn btn-success">Imprimir</a>
-        <a href="{% url 'fac:ventas_list' %}" class="btn btn-info">Cancelar</a>
+        <a href="{% url 'fac:ventas_list' %}" class="btn btn-info">Guardar</a>
     </div>
     
     <div class="card-body">
@@ -37,38 +35,41 @@
             <!-- Sección Superior -->
             <div class="row">
                 <!-- Sección Izquierda -->
-                <div class="col-lg-6 form-group">
+                <div class="col-md-4 form-group">
                     <div class="content">
                         <div class="row">
-                            <div class="col-lg-5 form-group">
+                            <div class="col-md-8 form-group">
                                 <select name="enc_cliente" id="enc_cliente" class="form-control">
                                     <option value="0">Seleccione Cliente</option>
                                     {% for item in clientes   %}
-                                    <option value="{{item.id}}">{{item.username }} {{ item.nombre }} {{item.apellido}} </option>
+                                    <option value="{{item.id}}">{{item.nit }} {{ item.nombre }} {{item.apellido}} </option>
                                     {% endfor %}
                                 </select>
                             </div>
-                            <label for="id_fecha_compra" class="col-sm-2 col-form-label">Fecha Compra:</label>
-                            <div class="col-sm-3 col-form-label">
+                            
+                        </div>
+                        <div class="row">
+                            <label for="id_fecha_compra" class="col-sm-3 col-form-label">Fecha Venta:</label>
+                            <div class="col-sm-4 col-form-label">
                                 {{form_enc.fecha_compra}}
                             </div>
                         </div>
                         <div class="row">
-                            <label class="col-sm-2 col-form-label" for="id_serie">Serie:</label>
+                            <label class="col-sm-3 col-form-label" for="id_serie">Serie:</label>
                             <div class="col-sm-3 col-form-label">
                                 {{form_enc.serie}}
                             </div>
-                            <label class="col-sm-2 col-form-label" for="id_numero">No. Factura:</label>
+                            <label class="col-sm-3 col-form-label" for="id_numero">No. Factura:</label>
                             <div class="col-sm-3 col-form-label">
                                 {{form_enc.numero}}
                             </div>
                         </div>
                         <div class="row">
-                            <label class="col-sm-2 col-form-label" for="total">Cantidad:</label>
+                            <label class="col-sm-3 col-form-label" for="total">Cantidad:</label>
                             <div class="col-sm-3 col-form-label">
                                 {{form_enc.cantidad_producto}}
                             </div>
-                            <label class="col-sm-2 col-form-label" for="total">Total:</label>
+                            <label class="col-sm-3 col-form-label" for="total">Total:</label>
                             <div class="col-sm-3 col-form-label">
                                 {{form_enc.total}}
                             </div>
@@ -77,23 +78,42 @@
 
                 </div>
                 <!-- Fin Sección Izquierda -->
+
                 <!-- Sección Derecha -->
-                <div class="col-lg-6 from-group">
+                <div class="col-lg-8 from-group">
                     <div class="row p-2">
-                        <div class="col-lg-2">Codigo</div>
+                        <div class="col-md-1">Codigo</div>
                         <div class="col-lg-3">
-                            <input type="text" class="form-control" name="codigo" id="codigo" required placeholder="Codigo">
+                            <input type="text" class="form-control" required name="codigo" id="codigo" readonly placeholder="Codigo">
                         </div>
-                        <div class="col-lg-6">
-                            <input type="text" class="form-control" name="descripcion" id="descripcion" placeholder="Descripción" disabled>
+                        <div class="col-lg-8">
+                            <select name="productos" id="productos" onChange="myFuntion(this)" class="form-control">       
+                                <option value="0"> Seleccione un Producto </option>
+                                {% for item in productos   %}
+                                <option value="{{item.codigo}}">{{ item.descripcion }}, {{item.marca.descripcion}}, {{item.unidad_medida.descripcion}},
+                                {{item.subcategoria.categoria.descripcion}}:{{item.subcategoria.descripcion}} </option>
+                                {% endfor %}
+                            </select>
                         </div>
-                        <div class="col-lg-1">
-                            <button type="button" class="btn btn-info" id="btnBuscar">
-                                <i class="fab fa-searchengin"></i>
-                            </button>
-                        </div>
+                       
                     </div>
-                    <div class="row">
+                    <div class="row p-2">
+                        <div class="col-lg-3">
+                            <input type="radio" name="RD" checked id="mercado" value="mercado">Precio Mercado<br>
+                        </div>
+                        <div class="col-lg-3">
+                            
+                            <input type="radio" name="RD" id="ganancia" value="ganancia">Precio Ganancia<br>
+                        </div>
+                         
+                        <div class="col-md-2">En Stock</div>
+                        <div class="col-lg-3">
+                            <input type="text" class="form-control" name="stock" id="stock" readonly placeholder="Stock">
+                        </div>
+                       
+                       
+                    </div>
+                    <div class="row p-2">
                         <div class="col-lg-2">Cantidad</div>
                         <div class="col-lg-3">
                             <input type="number" class="form-control" name="id_cantidad_detalle" id="id_cantidad_detalle" placeholder="Cantidad">
@@ -172,13 +192,53 @@
 
 {% block js_page %}
 <script>
+    function myFuntion(selectObject){
+        $('#codigo').val(selectObject.value);
+        $('#id_cantidad_detalle').focus();
+        buscarProducto();
+        
+    };
+    function precioDinamico(){
+        $("#id_cantidad_detalle").on('keyup', function(){
+            codigo=$("#codigo").val();
+            cantidad=$("#id_cantidad_detalle").val()
+            if(codigo===""|codigo==="0")
+            {
+                mensaje("Seleccione un Producto","red");
+            }
+             $('#id_cantidad_detalle').focus();
+            $.ajax({
+                url: '/fac/calculo/',
+                data: {
+                'codigo': codigo,
+                'cantidad':cantidad
+                },
+                dataType: 'json',
+                success: function (data) {
+                if (data.error) {
+                    mensaje(data.error,"red");
+                    $("#id_cantidad_detalle").val("0");
+                   
+                }
+                if(data.success){
+                    var total=data.success;
+                    var cantidad=$("#id_cantidad_detalle").val();
+                    var unitario=data.success/cantidad;
+                    $("#id_precio_detalle").val(unitario.toFixed(2));
+                    $("#id_total_detalle").val(total.toFixed(2));
+                    
+                }
+                }
+            });
+        }).keyup();
+    }
     function buscarProducto(){
         if($('#enc_cliente').val()==="0"||$('#enc_cliente').val()===null){
             mensaje("Cliente No Seleccionado","red");
-            return false;
+            //return false;
         }
         var codigo=$('#codigo').val();
-        if(codigo===""){
+        if(codigo===""||codigo==="0"){
             return false
         }
         var path="{% url 'api:producto_list' %}"+codigo;
@@ -188,26 +248,39 @@
             success: function(r){
                 
                 $("#codigo").val(r.codigo);
-                $("#descripcion").val(r.descripcion);
+                $("#id_precio_detalle").val(r.precio_venta);
+                $("#stock").val(r.existencia);
             },
             error:function(a,b,c){
                 
                 if(a.status==404){
                     mensaje("Producto - "+ codigo +"- No Encontrado o No Existe","red");
                     $("#codigo").val("");
-                    $("#descripcion").val("");
-                    $("#codigo").focus();
+                    $("#id_precio_detalle").val("");
+                    $("#stock").val("");
                 }
 
             }
         });
+        
     }; 
     $(function () {
+        
+        $('input[type=radio][name=RD]').change(function() {
+            if (this.value == 'ganancia') {
+                precioDinamico();
+            }
+            
+        });
         $("#enc_cliente").val("{{ encabezado.cliente.id }}").change();
         $("#sidebarToggle").click();
         $('#enc_cliente').select2({
             placeholder: "Seleccione Cliente",
             allowClear: true
+        });
+         $('#productos').select2({
+            placeholder: "Seleccione un Producto",
+            allowClear: true,    
         });
         $('#id_cantidad_detalle,#id_precio_detalle').change(function(){
             calcular_detalle();

@@ -90,7 +90,7 @@ class Lote(ClasesModelo):
     costo_unitario = models.FloatField(default=0)
     costo_total = models.FloatField(default=0)
     ganancia = models.FloatField()
-    # precio_unitario = models.FloatField()
+    precio_unitario = models.FloatField()
     # precio_total = models.FloatField()
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     facturacompra = models.ForeignKey(FacturaCompra, on_delete=models.CASCADE)
@@ -98,15 +98,9 @@ class Lote(ClasesModelo):
     def save(self):
 
         self.cantidad_inicial = self.cantidad
-        # self.ganancia = 0
-        # self.precio_unitario = 0
-        # self.precio_total = 0
         self.costo_total = float(
             float(int(self.cantidad)) * float(self.costo_unitario))
         super(Lote, self).save()
-        # self.precio_total = float(
-        #    float(int(self.cantidad)) * float(self.precio_unitario))
-        # super(Lote, self).save()
 
     class Meta:
         verbose_name_plural = "Detalles Compras"
@@ -121,23 +115,16 @@ class Registro_Lote(ClasesModelo):
     costo_unitario = models.FloatField(default=0)
     costo_total = models.FloatField(default=0)
     ganancia = models.FloatField()
-    # precio_unitario = models.FloatField()
+    precio_unitario = models.FloatField()
     # precio_total = models.FloatField()
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     facturacompra = models.ForeignKey(FacturaCompra, on_delete=models.CASCADE)
 
     def save(self):
-
         self.cantidad_inicial = self.cantidad
-        # self.ganancia = 0
-        # self.precio_unitario = 0
-        # self.precio_total = 0
         self.costo_total = float(
             float(int(self.cantidad)) * float(self.costo_unitario))
         super(Registro_Lote, self).save()
-        # self.precio_total = float(
-        #    float(int(self.cantidad)) * float(self.precio_unitario))
-        # super(Lote, self).save()
 
     class Meta:
         verbose_name_plural = "Lotes Compras"
@@ -148,15 +135,14 @@ class Registro_Lote(ClasesModelo):
 def detalle_compra_borrar(sender, instance, **kwargs):
     id_producto = instance.producto.id
     id_compra = instance.facturacompra.id
-    Lote.objects.get(facturacompra=id_compra).delete()
-
+    Lote.objects.get(facturacompra=id_compra, producto=id_producto).delete()
     enc = FacturaCompra.objects.filter(pk=id_compra).first()
     if enc:
         total = Registro_Lote.objects.filter(
-            facturacompra=id_compra).aggregate(Sum('costo_total'))
+            facturacompra=id_compra, estado=True).aggregate(Sum('costo_total'))
 
         cantidad = Registro_Lote.objects.filter(
-            facturacompra=id_compra).aggregate(Sum('cantidad'))
+            facturacompra=id_compra, estado=True).aggregate(Sum('cantidad'))
         if total["costo_total__sum"] == None:
             total["costo_total__sum"] = 0
             cantidad["cantidad__sum"] = 0
@@ -181,8 +167,7 @@ def detalle_compra_guardar(sender, instance, **kwargs):
     prod = Producto.objects.filter(pk=id_producto).first()
     cantidad = Lote.objects.filter(
         producto=prod, estado=True).aggregate(Sum('cantidad'))
-    print("cantidad "+str(cantidad))
-    print(cantidad["cantidad__sum"])
+
     if prod:
         if cantidad["cantidad__sum"]:
             prod.existencia = cantidad["cantidad__sum"]

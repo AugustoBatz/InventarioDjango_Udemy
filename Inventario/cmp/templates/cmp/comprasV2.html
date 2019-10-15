@@ -86,11 +86,12 @@
                         <div class="col-lg-3">
                             <input type="text" class="form-control"  readonly="readonly" name="codigo" id="codigo" placeholder="Codigo" required>
                         </div>
-                        <div class="col-lg-7">
+                        <div class="col-lg-8">
                             <select name="productos" id="productos" onChange="myFuntion(this)" class="form-control">       
                                 <option value="0"> Seleccione un Producto </option>
                                 {% for item in productos   %}
-                                <option value="{{item.codigo}}">{{ item.descripcion }}, {{item.marca.descripcion}}, {{item.unidad_medida.descripcion}} </option>
+                                <option value="{{item.codigo}}">{{ item.descripcion }}, {{item.marca.descripcion}}, {{item.unidad_medida.descripcion}},
+                                {{item.subcategoria.categoria.descripcion}}:{{item.subcategoria.descripcion}} </option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -111,7 +112,20 @@
                         </div>
                         
                     </div>
-                    <div class="row">
+                    <div class="row p-2">
+                        <div class="col-sm-2">SubCategoria</div>
+                        <div class="col-lg-2">
+                            <input type="text" class="form-control"  disabled name="subcategoria" id="subcategoria" placeholder="SubCategoria">
+                        </div>
+                        <div class="col-lg-2">Ganancia</div>
+                        <div class="col-lg-2">
+                            <input type="number" min="0" step="0.01"  class="form-control"name="ganancia" id="ganancia" placeholder="Ganancia">
+                        </div>
+                        <div class="col-lg-2 p-2">%</div>
+                        
+                        
+                    </div>
+                    <div class="row p-2">
                         <div class="col-lg-2">Cantidad</div>
                         <div class="col-lg-3">
                             <input type="number" class="form-control" name="id_cantidad_detalle" id="id_cantidad_detalle" placeholder="Cantidad">
@@ -196,6 +210,7 @@
 <script>
     function myFuntion(selectObject){
         $('#codigo').val(selectObject.value);
+        buscarProducto();
         
     };
     function buscarProducto(){
@@ -204,7 +219,9 @@
             return false;
         }
         var codigo=$('#codigo').val();
-        if(codigo===""){
+        if(codigo===""||codigo==="0"){
+            
+            $('#codigo').val("")
             return false
         }
         var path="{% url 'api:producto_list' %}"+codigo;
@@ -213,13 +230,17 @@
             url:path,
             success: function(r){
                 
-                $("#codigo").val(r.codigo);
-                $("#descripcion").val(r.descripcion);
+               
+                $("#producto").val(r.descripcion);
+                $("#marca").val(r.marca.descripcion);
+                $("#producto").val(r.descripcion);
+                $("#producto").val(r.descripcion);
+                
             },
             error:function(a,b,c){
                 if(a.status==404){
                     mensaje("Producto - "+ codigo +"- No Encontrado o No Existe","red");
-                    $("#codigo").val("");
+                    
                     $("#descripcion").val("");
                     $("#codigo").focus();
                 }

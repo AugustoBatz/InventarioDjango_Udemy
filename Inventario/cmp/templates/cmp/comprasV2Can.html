@@ -1,0 +1,133 @@
+{% extends 'base/base.html' %}
+
+{% block page_content %}
+<form id="frmCompras">
+    {% csrf_token %}
+<div class="card shadow mb-4">
+   
+    <div class="card-header border-left-warning py-3 d-flex flex-row align-items-center justify-content-between">    
+
+        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                              Compra Cancelada 
+        </div>
+        
+        <a href="{% url 'cmp:compras_canceladas' %}" class="btn btn-info">Guardar</a>
+    </div>
+    
+    <div class="card-body">
+        <div class="content">
+            <!-- Sección Superior -->
+            <div class="row">
+                <!-- Sección Izquierda -->
+                <div class="col-md-6 form-group">
+                    <div class="content col-sm">
+                        <div class="row">
+                            <label for="id_fecha_compra" class="col-sm-3 col-form-label">Proveedor:</label>
+                            <div class="col-sm-4 col-form-label">
+                                {{ encabezado.proveedor}}
+                            </div>
+                           
+                        </div>
+                        <div class="row">
+                            
+                            <label for="id_fecha_compra" class="col-sm-3 col-form-label">Fecha Compra:</label>
+                            <div class="col-sm-4 col-form-label">
+                                {{form_enc.fecha_compra}}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-3 col-form-label" for="id_serie">Serie:</label>
+                            <div class="col-sm-3 col-form-label">
+                                {{form_enc.serie}}
+                            </div>
+                            <label class="col-sm-3 col-form-label" for="id_numero">No. Factura:</label>
+                            <div class="col-sm-3 col-form-label">
+                                {{form_enc.numero}}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-3 col-form-label" for="total">Cantidad:</label>
+                            <div class="col-sm-3 col-form-label">
+                                {{form_enc.cantidad_producto}}
+                            </div>
+                            <label class="col-sm-3 col-form-label" for="total">Total:</label>
+                            <div class="col-sm-3 col-form-label">
+                                {{form_enc.total}}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <!-- Fin Sección Izquierda -->
+                <!-- Sección Derecha -->
+                
+            </div>
+            <!-- Fin Sección Superior -->
+            <!-- Inicio Detalle -->
+            <hr>
+            <div class="row p-1">
+                <div class="col-lg-12">
+                    <table
+                        data-toggle="table"
+                        data-pagination="true"
+                        data-search="true"
+                        data-show-columns="true"
+                        data-show-toggle="true"
+                        data-show-fullscreen="true"
+                        data-locale="es-NI"
+                        >
+                        <thead>
+                            <th>Numero</th>
+                            <th>Producto</th>
+                            <th>Marca</th>
+                            <th>Categoria</th>
+                            <th>Unidad</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                            <th>Total</th>
+                           
+                        </thead>
+                        <tbody>
+                            {% for item in detalle %}
+                            <tr>
+
+                                <td>{{ item.pk }}</td>
+                                <td>{{ item.producto }}</td>
+                                <td>{{ item.producto.marca.descripcion }}</td>
+                                <td>{{ item.producto.subcategoria.descripcion }}</td>
+                                <td>{{ item.producto.unidad_medida.descripcion }}</td>
+                                <td>{{ item.cantidad }}</td>
+                                <td>{{ item.costo_unitario }}</td>
+                                <td>{{ item.costo_total }}</td>
+                               
+                            
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+            <!-- Fin Detalle -->
+        </div>
+    </div>
+</div>
+</form>
+{% endblock %}
+
+
+{% block js_page %}
+<script>
+    
+
+    };
+    $(function () {
+        
+        $("#enc_proveedor").val("{{ encabezado.proveedor.id }}").change();
+        $("#sidebarToggle").click();
+        
+    });
+   
+    
+</script>
+{% endblock %}

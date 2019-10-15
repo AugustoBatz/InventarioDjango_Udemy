@@ -41,6 +41,8 @@
                     <th data-sortable="true" data-field="cantidadi">Cantidad I</th>
                     <th data-sortable="true" data-field="co">Costo Unitario</th>
                     <th data-sortable="true" data-field="ct">Costo Total</th>
+                    <th data-sortable="true" data-field="ga">Ganancia</th>
+                    <th data-sortable="true" data-field="pu">Precio Unitario</th>
                     
                 </thead>
                  
@@ -55,6 +57,8 @@
                             <td>{{ item.cantidad_inicial }}</td>
                             <td>{{ item.costo_unitario }}</td>
                             <td>{{ item.costo_total }}</td>
+                            <td>{{ item.ganancia }}%</td>
+                            <td>{{ item.precio_unitario }}</td>
                         </tr>
                         {% endif %}
                     {% endfor %}

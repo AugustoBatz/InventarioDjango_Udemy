@@ -17,7 +17,8 @@ urlpatterns = [
     path('ventas2/new', ventas, name="ventas_new2"),
     path('ventas2/edit/<int:facturaventa_id>', ventas, name="ventas_edit2"),
     path('ventas/buscarProducto', ProductoView.as_view(), name="compra_producto"),
-    path('ventas/print', reporte_ventasPDF, name="fac_print")
+    path('ventas/print', reporte_ventasPDF, name="fac_print"),
+    path('calculo/', precio_dinamico, name="precio")
     # path('ventas/<int:facturventa_id>/delete/<int:pk>',
     #     CompraDetDelete.as_view(), name="ventas_del"),
     #path('ventas/listado', reporte_compras, name="ventas_print_all")

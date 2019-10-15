@@ -121,6 +121,45 @@ class FacturaCompraView(LoginRequiredMixin, PermissionRequiredMixin, generic.Lis
     login_url = "bases:login"
 
 
+class FacturaCompraCanView(LoginRequiredMixin, PermissionRequiredMixin, generic.ListView):
+    permission_required = 'cmp.can_mark_returned'
+    model = FacturaCompra
+    template_name = "cmp/compras_canceladas.html"
+    context_object_name = "obj"
+    login_url = "bases:login"
+
+
+@login_required(login_url="bases:login")
+def compra_cancelada(request, facturacompra_id=None):
+    template_name = 'cmp/comprasV2Can.html'
+    prod = Producto.objects.filter(estado=True)
+    form_compras = {}
+    proveedores = Proveedor.objects.filter(estado=True)
+    contexto = {}
+    if request.method == 'GET':
+        form_compras = FacturaCompraForm()
+        enc = FacturaCompra.objects.filter(pk=facturacompra_id).first()
+
+        if enc:
+            det = Registro_Lote.objects.filter(facturacompra=enc)
+            fecha_compra = datetime.date.isoformat(enc.fecha_compra)
+            e = {
+                'fecha_compra': fecha_compra,
+                'proveedor': enc.proveedor,
+                'serie': enc.serie,
+                'numero': enc.numero,
+                'cantidad_producto': enc.cantidad_producto,
+                'total': enc.total
+            }
+            form_compras = FacturaCompraForm(e)
+
+        else:
+            det = None
+        contexto = {'productos': prod, 'encabezado': enc,
+                    'detalle': det, 'form_enc': form_compras, 'proveedores': proveedores, 'source': 'proveedor'}
+    return render(request, template_name, contexto)
+
+
 @login_required(login_url="bases:login")
 def compras(request, facturacompra_id=None):
     template_name = "cmp/compras.html"
@@ -341,9 +380,11 @@ def compras2(request, facturacompra_id=None):
         cantidad = request.POST.get("id_cantidad_detalle")
         precio = request.POST.get("id_precio_detalle")
         total = request.POST.get("id_total_detalle")
-        print(codigo)
+        ganancia = float(request.POST.get("ganancia"))
+        print(ganancia)
         prod = Producto.objects.get(codigo=codigo)
-        print(prod)
+        precio_unitario = (ganancia/100)*float(precio)+float(precio)
+        precio_unitario = round(precio_unitario, 2)
         Lotes = Lote.objects.filter(producto_id=prod).order_by(
             '-noLote').values('noLote')[:1]
         noLote = 1
@@ -361,7 +402,9 @@ def compras2(request, facturacompra_id=None):
             costo_total=total,
             uc=request.user,
             fecha=fecha_compra,
-            noLote=noLote
+            noLote=noLote,
+            ganancia=ganancia,
+            precio_unitario=precio_unitario
         )
         registro = Registro_Lote(
             facturacompra=enc,
@@ -371,7 +414,9 @@ def compras2(request, facturacompra_id=None):
             costo_total=total,
             uc=request.user,
             fecha=fecha_compra,
-            noLote=noLote
+            noLote=noLote,
+            ganancia=ganancia,
+            precio_unitario=precio_unitario
         )
         if det:
             existe_lote_producto = Lote.objects.filter(
